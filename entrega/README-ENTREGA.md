@@ -29,7 +29,7 @@ Como validar:
 pytest -q tests/test_status_rules.py
 
 
-2 - test_currency_conversion_to_brl
+2 - test_currency_conversion_to_brl / Câmbio
 
 Causa raiz: concert_to_brl não multiplicava o valor e sim dividia.
 
@@ -61,12 +61,32 @@ Obtido - -28
 
 A propria biblioteca datatime cuida desses casos, permitindo subtrair as datas e em seguida possibilitando mostrar os dias usando .days. Essa logica tambem está descrita no README na logica de negocio.
 
-Como validar:
-pytest -1 tests/test_nights.py
-
 antes:
 return (checkout.day - checkin.day) * rooms
 
 depois: 
 return (checkout - checkin).days * rooms
+
+Como validar:
+pytest -1 tests/test_nights.py
+
+
+4 - Test_top_hotels_are_ranked_descending / Ordenação
+
+Causa raiz: A função sorted, dentro do arquivo report_builder.py, ordenava os itens total_brl mas de forma incorreta. O certo é ser ordenado de forma decrescente, e ele estava fazendo o contrario.
+
+O problema foi resolvido de forma simples, apenas colocando um "-" antes do item tornando ele negativo. E o valor negativo vem primeiro.
+
+
+Antes:
+ranked_hotels = sorted(hotels.items(), key=lambda item: (item[1]["amount"], item[0]))
+
+Depois:
+ranked_hotels = sorted(hotels.items(), key=lambda item: (-item[1]["amount"], item[0]))
+
+Como validar:
+pytest -1 tests/test_top_hotels.py
+
+
+
 

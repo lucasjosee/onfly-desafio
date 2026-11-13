@@ -39,8 +39,9 @@ Esperado - 642.00
 
 Obtido - 118.45
 
-
 Também olhei nas regras de negocio do REAME que a conversão é feita multiplicando amout por rate_to_brl. E quando olhei o service ele estava divindo ao inves de estar multiplicando.
+
+OBS: os dados dentro da função estavam sendo declarados como float, oq vai contra a exatidão, que pede o uso de Decimal.
 
 Troquei apenas o sinal e o teste passou
 
@@ -88,5 +89,11 @@ Como validar:
 pytest -1 tests/test_top_hotels.py
 
 
+5 - test_regression_report_on_sample /  Teste de regressão
+
+Esse teste não exigiu correção propria, ele combina status, noites e cambio. Após resolver o defeito de cambio, que era a unica coisa que afetava esse teste, ele passou.
+
+Como validar:
+pytest -1 tests/test_regression_report.py
 
 

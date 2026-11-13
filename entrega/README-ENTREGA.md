@@ -17,17 +17,19 @@ Obtido - 120.00
 
 Percebi que o NO_SHOW estava sendo somado a fatura, alem de somar noites, by_month e top_hotels. No codigo vi que existia uma comparação que deixava o NO_SHOW passar.
 
+Antes:
 return status != "CANCELLED"
 
 Inverti a logica, fazendo a função só retornar true se o status for confirmed.
- 
+
+Depois:
 return status == "CONFIRMED"
 
 Como validar:
 pytest -q tests/test_status_rules.py
 
 
-2 - test_currency_conversion_to_brl / Cambio
+2 - test_currency_conversion_to_brl
 
 Causa raiz: concert_to_brl não multiplicava o valor e sim dividia.
 
@@ -46,4 +48,25 @@ Como validar:
 pytest -1 tests/test_currency.py
 
 
+3 - test_nights_across_month_boundary / Noites
+
+Causa raiz: calculate_room_nights usava .day, pegando o dia do checkin e checkout, e subtraindo. Porem, isso não trata os casos de virada do mes:
+
+"checkin_date": "2025-01-30"
+"checkout_date": "2025-02-02"
+
+Esperado - 3
+
+Obtido - -28
+
+A propria biblioteca datatime cuida desses casos, permitindo subtrair as datas e em seguida possibilitando mostrar os dias usando .days. Essa logica tambem está descrita no README na logica de negocio.
+
+Como validar:
+pytest -1 tests/test_nights.py
+
+antes:
+return (checkout.day - checkin.day) * rooms
+
+depois: 
+return (checkout - checkin).days * rooms
 

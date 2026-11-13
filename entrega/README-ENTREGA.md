@@ -41,7 +41,6 @@ Obtido - 118.45
 
 Também olhei nas regras de negocio do REAME que a conversão é feita multiplicando amout por rate_to_brl. E quando olhei o service ele estava divindo ao inves de estar multiplicando.
 
-OBS: os dados dentro da função estavam sendo declarados como float, oq vai contra a exatidão, que pede o uso de Decimal.
 
 Troquei apenas o sinal e o teste passou
 
@@ -89,11 +88,31 @@ Como validar:
 pytest -1 tests/test_top_hotels.py
 
 
-5 - test_regression_report_on_sample /  Teste de regressão
+5 - test_regression_report_on_sample / Teste de regressão
 
 Esse teste não exigiu correção propria, ele combina status, noites e cambio. Após resolver o defeito de cambio, que era a unica coisa que afetava esse teste, ele passou.
 
 Como validar:
 pytest -1 tests/test_regression_report.py
+
+
+6 - Dinheiro passando por float
+
+Causa raiz: Na função convert_to_brl, o dinheiro antes de ser passado para Decimal, passa por float, e o float não representa decimais exatamente e isso pode mudar o centavo em alguns casos. 
+
+Os teste fornecidos ja passavam, mas quando bati o olho na parte de exatidão, onde é deixado explicito que não pode ser usado float dei mais uma checada no arquivo.
+
+Antes:
+return Decimal(str(float(amount) * float(rate)))
+
+Depois:
+return amount * rate
+
+Como as variaveis amount e rate ja são Decimais, não é necessario a converção.
+
+Como validar:
+pytest -q tests/test_money_precision.py
+
+
 
 

@@ -1,6 +1,36 @@
 # Entrega
 
-## 1. `test_status_rules` — Regras de status
+## Como investigou/abordou o problema
+
+Primeiro, analisei os testes que falhavam: quais eram seus resultados esperados e obtidos, quais os casos de teste e qual regra de negócio abordavam. Em seguida, fui analisando cada arquivo do `services` e comparando com a sua respectiva regra de negócio. Por fim, veio a validação através dos testes e, depois, a validação com os dados reais.
+
+## Como validar
+
+Com o ambiente preparado conforme o README principal:
+
+```bash
+pytest -q
+
+PYTHONPATH=src python -m onfly_report \
+  --input data/reservas_hoteis.csv \
+  --rates data/taxas_cambio.csv \
+  --output output/report.json
+```
+
+Saída esperada do CLI: `Reservas: 300 | Confirmadas: 235 | Noites: 1347 | Total BRL: 396170.00`.
+
+**Resultado do pytest:**
+
+```text
+.......                                                                  [100%]
+7 passed in 0.37s
+```
+
+---
+
+## Defeitos corrigidos
+
+### 1. `test_status_rules` — Regras de status
 
 **Causa raiz:** `is_billable` excluía apenas `"CANCELLED"` e deixava `"NO_SHOW"` passar.
 
@@ -42,7 +72,7 @@ pytest -q tests/test_status_rules.py
 
 ---
 
-## 2. `test_currency_conversion_to_brl` — Câmbio
+### 2. `test_currency_conversion_to_brl` — Câmbio
 
 **Causa raiz:** `convert_to_brl` não multiplicava o valor, e sim dividia.
 
@@ -64,7 +94,7 @@ pytest -q tests/test_currency.py
 
 ---
 
-## 3. `test_nights_across_month_boundary` — Noites
+### 3. `test_nights_across_month_boundary` — Noites
 
 **Causa raiz:** `calculate_room_nights` usava `.day`, pegando o dia do check-in e do checkout e subtraindo. Porém, isso não trata os casos de virada do mês:
 
@@ -99,7 +129,7 @@ pytest -q tests/test_nights.py
 
 ---
 
-## 4. `test_top_hotels_are_ranked_descending` — Ordenação
+### 4. `test_top_hotels_are_ranked_descending` — Ordenação
 
 **Causa raiz:** A função `sorted`, dentro do arquivo `report_builder.py`, ordenava os itens por `amount`, mas de forma incorreta. O certo é ordenar de forma decrescente, e ela estava fazendo o contrário.
 
@@ -125,7 +155,7 @@ pytest -q tests/test_top_hotels.py
 
 ---
 
-## 5. `test_regression_report_on_sample` — Teste de regressão
+### 5. `test_regression_report_on_sample` — Teste de regressão
 
 Esse teste não exigiu correção própria; ele combina status, noites e câmbio. Após resolver o defeito de câmbio, que era a única coisa que afetava esse teste, ele passou.
 
@@ -137,7 +167,7 @@ pytest -q tests/test_regression_report.py
 
 ---
 
-## 6. Dinheiro passando por `float`
+### 6. Dinheiro passando por `float`
 
 **Causa raiz:** Na função `convert_to_brl`, o dinheiro, antes de ser passado para `Decimal`, passa por `float`, e o `float` não representa decimais exatamente, o que pode mudar o centavo em alguns casos.
 
@@ -165,11 +195,11 @@ pytest -q tests/test_money_precision.py
 
 ---
 
-## 7. O relatório não usa o arquivo inteiro
+### 7. O relatório não usa o arquivo inteiro
 
 **Causa raiz:** O código não lia o arquivo CSV inteiro, parando na linha 200 por causa de um `if`.
 
-Ao rodar a CLI, percebi que o código lia apenas 200 das 300 linhas disponíveis no CSV. Quando olhei o arquivo `csv_reservation_repository.py`, vi que existia um `if` que parava a leitura quando as linhas chegavam a 200. Removi o `if` e agora o arquivo inteiro é lido.
+Ao rodar o CLI, percebi que o código lia apenas 200 das 300 linhas disponíveis no CSV. Quando olhei o arquivo `csv_reservation_repository.py`, vi que existia um `if` que parava a leitura quando as linhas chegavam a 200. Removi o `if` e agora o arquivo inteiro é lido.
 
 **Como validar:**
 

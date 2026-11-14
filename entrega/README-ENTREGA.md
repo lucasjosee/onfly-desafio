@@ -114,5 +114,12 @@ Como validar:
 pytest -q tests/test_money_precision.py
 
 
+7 - o relatorio não usa o arquivo inteiro
 
+Causa raiz: Codigo não lia o arquivo CSV inteiro, parando na linha 200 devido a um if.
+
+Ao rodar o CLI percebi que o codigo lia apenas 200 das 300 linhas disponiveis no CSV. Quando olhei o arquivo csv_reservation_repository.py vi que o existia um if que parava a leitura quando as linhas batiam 200. Removi o if e agora o arquivo inteiro é lido.
+
+Como validar:
+pytest -q tests/test_full_file_read.py
 
